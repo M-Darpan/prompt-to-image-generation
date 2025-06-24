@@ -1,0 +1,61 @@
+# =============================================================================
+# AI Image Generator - Requirements File
+# =============================================================================
+#
+# INSTALLATION INSTRUCTIONS:
+# -------------------------
+#
+# 1. First, ensure you have installed:
+#    - Python 3.8 or higher
+#    - Visual Studio Build Tools with C++ support
+#    - Rust (via rustup)
+#
+# 2. Create and activate a virtual environment:
+#    python -m venv venv
+#    .\venv\Scripts\activate  # On Windows
+#    source venv/bin/activate # On Linux/Mac
+#
+# 3. Upgrade pip:
+#    python -m pip install --upgrade pip
+#
+# 4. Install PyTorch first (choose one):
+#    # For NVIDIA GPU support:
+#    pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
+#    # For CPU only:
+#    pip install torch torchvision
+#
+# 5. Then install the rest of the requirements:
+#    pip install -r requirements.txt
+#
+# =============================================================================
+# Core Dependencies
+# =============================================================================
+
+# Deep Learning Framework
+torch==2.7.1
+torchvision==0.18.1
+
+# Diffusion Models and Transformers
+diffusers==0.24.0
+transformers==4.35.0
+accelerate==0.24.0
+safetensors==0.4.0
+
+# Image Processing
+pillow>=10.0.0
+
+# Scientific Computing
+numpy>=1.24.3
+
+# Progress Bars and Utilities
+tqdm>=4.65.0
+omegaconf>=2.3.0
+
+# Model Management
+huggingface-hub>=0.19.0
+
+# Dataset Handling
+datasets>=2.14.0
+
+# Note: tkinter is required but comes with Python installation
+# If tkinter is missing, reinstall Python with tkinter option checked 

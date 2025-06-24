@@ -1,0 +1,59 @@
+# =============================================================================
+# AI Image Generator - GPU Requirements
+# =============================================================================
+#
+# INSTALLATION INSTRUCTIONS FOR GPU PIPELINE:
+# ----------------------------------------
+#
+# Prerequisites:
+# 1. NVIDIA GPU with CUDA support
+# 2. NVIDIA drivers installed
+# 3. Visual Studio Build Tools with C++ support
+# 4. Rust (via rustup)
+#
+# Installation Steps:
+# 1. Install PyTorch with CUDA:
+#    pip install torch==2.7.1+cu121 torchvision==0.18.1+cu121 --index-url https://download.pytorch.org/whl/cu121
+#
+# 2. Install the rest:
+#    pip install -r requirements-gpu.txt
+#
+# =============================================================================
+
+# Deep Learning Framework (CUDA-enabled)
+--find-links https://download.pytorch.org/whl/cu121/torch_stable.html
+torch>=2.2.0
+torchvision>=0.17.0
+
+# Diffusion Models and Transformers
+diffusers>=0.25.0
+transformers>=4.37.0
+accelerate>=0.27.0
+safetensors==0.4.0
+
+# CUDA Optimizations
+xformers==0.0.23.post1
+triton==2.1.0
+
+# Image Processing
+Pillow>=10.2.0
+
+# Scientific Computing
+numpy>=1.26.0
+
+# Progress Bars and Utilities
+tqdm>=4.66.0
+omegaconf>=2.3.0
+
+# Model Management
+huggingface-hub>=0.19.0
+
+# Dataset Handling
+datasets>=2.17.0
+
+# Note: tkinter is required but comes with Python installation
+# If tkinter is missing, reinstall Python with tkinter option checked
+
+# Additional dependencies
+colorama>=0.4.6
+tkinter-utils>=0.1.0 

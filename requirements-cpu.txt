@@ -1,0 +1,56 @@
+# =============================================================================
+# AI Image Generator - CPU Requirements
+# =============================================================================
+#
+# INSTALLATION INSTRUCTIONS FOR CPU PIPELINE:
+# ----------------------------------------
+#
+# Prerequisites:
+# 1. Visual Studio Build Tools with C++ support
+# 2. Rust (via rustup)
+#
+# Installation Steps:
+# 1. Install PyTorch (CPU version):
+#    pip install torch==2.7.1+cpu torchvision==0.18.1+cpu --index-url https://download.pytorch.org/whl/cpu
+#
+# 2. Install the rest:
+#    pip install -r requirements-cpu.txt
+#
+# Note: CPU pipeline will be significantly slower than GPU pipeline
+# but will work on any computer with sufficient RAM (8GB minimum)
+#
+# =============================================================================
+
+# Deep Learning Framework (CPU-only)
+--find-links https://download.pytorch.org/whl/cpu/torch_stable.html
+torch>=2.2.0+cpu
+torchvision>=0.17.0+cpu
+
+# Diffusion Models and Transformers
+diffusers>=0.25.0
+transformers>=4.37.0
+accelerate>=0.27.0
+safetensors==0.4.0
+
+# Image Processing
+Pillow>=10.2.0
+
+# Scientific Computing
+numpy>=1.26.0
+
+# Progress Bars and Utilities
+tqdm>=4.66.0
+omegaconf>=2.3.0
+colorama>=0.4.6
+
+# Model Management
+huggingface-hub>=0.19.0
+
+# Dataset Handling
+datasets>=2.17.0
+
+# Note: tkinter is required but comes with Python installation
+# If tkinter is missing, reinstall Python with tkinter option checked
+
+# Additional dependencies
+tkinter-utils>=0.1.0 
