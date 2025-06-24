@@ -50,20 +50,27 @@ class LowResourceImageGenerator:
         "animal": "highly detailed, professional wildlife photography, national geographic style, natural lighting, detailed fur texture, anatomically correct, hyperrealistic, 8k uhd, sharp focus, high resolution, professional camera, perfect composition, award winning photo, masterpiece",
         "bird": "highly detailed, professional bird photography, audubon style, natural lighting, detailed feathers, anatomically correct, hyperrealistic, 8k uhd, sharp focus, high resolution, professional camera, perfect composition, award winning photo, masterpiece",
         "nature": "highly detailed, professional landscape photography, natural lighting, detailed textures, photorealistic, 8k uhd, sharp focus, high resolution, professional camera, perfect composition, award winning photo, masterpiece",
+        "dragon": "highly detailed, mythical creature, scales texture, powerful pose, majestic wings, fantasy art, professional digital art, hyperrealistic, 8k uhd, sharp focus, high resolution, cinematic lighting, perfect composition, award winning artwork, masterpiece",
+        "unicorn": "highly detailed, mythical creature, iridescent coat, flowing mane, magical aura, fantasy art, professional digital art, hyperrealistic, 8k uhd, sharp focus, high resolution, ethereal lighting, perfect composition, award winning artwork, masterpiece",
+        "phoenix": "highly detailed, mythical bird, flame feathers, glowing embers, rising from ashes, fantasy art, professional digital art, hyperrealistic, 8k uhd, sharp focus, high resolution, dramatic lighting, perfect composition, award winning artwork, masterpiece",
+        "mermaid": "highly detailed, mythical being, iridescent scales, flowing hair, underwater scene, fantasy art, professional digital art, hyperrealistic, 8k uhd, sharp focus, high resolution, underwater lighting, perfect composition, award winning artwork, masterpiece",
+        "griffin": "highly detailed, mythical creature, eagle head, lion body, majestic wings, fantasy art, professional digital art, hyperrealistic, 8k uhd, sharp focus, high resolution, dramatic lighting, perfect composition, award winning artwork, masterpiece",
+        "werewolf": "highly detailed, mythical creature, detailed fur, muscular form, transformation, fantasy art, professional digital art, hyperrealistic, 8k uhd, sharp focus, high resolution, moonlit scene, perfect composition, award winning artwork, masterpiece"
     }
 
-    # Enhanced negative prompts for better quality
-    BASE_NEGATIVE_PROMPT = """
-        deformed, blurry, ugly, cartoon, lowres, watermark, disfigured, glitch, pixelated, grainy, distorted, 
-        creepy, draft, badhands, bad anatomy, bad proportions, duplicate limbs, extra limbs, missing limbs, 
-        poorly drawn face, poorly drawn hands, poorly drawn feet, mutation, mutated, extra fingers, missing fingers, 
-        floating limbs, disconnected limbs, malformed limbs, missing arms, missing legs, extra arms, extra legs, 
-        fused fingers, too many fingers, long neck, cross-eyed, mutated hands, cropped, out of frame, jpeg artifacts, 
-        signature, text, logo, wordmark, duplicate, error, cropped, worst quality, low quality, normal quality, 
-        artificial, fake looking, unnatural pose, poor lighting, stiff pose
-    """.replace('\n', ' ').replace('    ', ' ').strip()
+    # Enhanced negative prompts for better quality and specific creature types
+    NEGATIVE_PROMPTS = {
+        "animal": "deformed, blurry, ugly, cartoon, lowres, watermark, disfigured, glitch, pixelated, grainy, distorted, poorly drawn face, poorly drawn feet, mutation, mutated, extra limbs, missing limbs, floating limbs, disconnected limbs, malformed limbs, extra fingers, missing fingers, human features, anthropomorphic",
+        "bird": "deformed, blurry, ugly, cartoon, lowres, watermark, disfigured, glitch, pixelated, grainy, distorted, poorly drawn wings, poorly drawn beak, mutation, mutated, extra wings, missing wings, floating feathers, disconnected parts, malformed beak, human features, anthropomorphic",
+        "dragon": "cute, chibi, cartoon, anime, poorly drawn scales, poorly drawn wings, deformed, blurry, ugly, lowres, watermark, disfigured, glitch, pixelated, grainy, distorted, childish, toy-like, plastic",
+        "unicorn": "cute, chibi, cartoon, anime, poorly drawn horn, poorly drawn mane, deformed, blurry, ugly, lowres, watermark, disfigured, glitch, pixelated, grainy, distorted, childish, toy-like, plastic",
+        "phoenix": "cute, chibi, cartoon, anime, poorly drawn flames, poorly drawn wings, deformed, blurry, ugly, lowres, watermark, disfigured, glitch, pixelated, grainy, distorted, childish, toy-like",
+        "mermaid": "cute, chibi, cartoon, anime, poorly drawn scales, poorly drawn tail, deformed, blurry, ugly, lowres, watermark, disfigured, glitch, pixelated, grainy, distorted, childish, toy-like",
+        "griffin": "cute, chibi, cartoon, anime, poorly drawn beak, poorly drawn wings, deformed, blurry, ugly, lowres, watermark, disfigured, glitch, pixelated, grainy, distorted, childish, toy-like",
+        "werewolf": "cute, chibi, cartoon, anime, poorly drawn fur, poorly drawn claws, deformed, blurry, ugly, lowres, watermark, disfigured, glitch, pixelated, grainy, distorted, childish, toy-like"
+    }
 
-    def __init__(self, model_id: str = "CompVis/stable-diffusion-v1-4"):
+    def __init__(self, model_id: str = "stabilityai/stable-diffusion-xl-base-1.0"):
         """Initialize the image generator with optimizations for low resource systems"""
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         logger.info(f"Using device: {self.device}")
@@ -182,63 +189,47 @@ class LowResourceImageGenerator:
 
     def get_negative_prompt(self, subject_type: str = "animal") -> str:
         """Get specialized negative prompt based on subject type"""
-        subject_specific = ""
-        if subject_type == "animal":
-            subject_specific = "anthropomorphic, humanoid, human features, clothes, dressed, cartoon animal, stuffed animal, toy, "
-        elif subject_type == "bird":
-            subject_specific = "anthropomorphic, humanoid, human features, clothes, dressed, cartoon bird, stuffed bird, toy, wrong beak, "
-        
-        return f"{subject_specific}{self.BASE_NEGATIVE_PROMPT}"
-    
+        return self.NEGATIVE_PROMPTS.get(subject_type, self.NEGATIVE_PROMPTS["animal"])
+
     def generate_image(
         self,
         prompt: str,
         subject_type: str = "animal",
         orientation: ImageOrientation = ImageOrientation.LANDSCAPE,
-        negative_prompt: Optional[str] = None,
-        num_inference_steps: int = 40,  # Increased for better quality
-        guidance_scale: float = 9.5,
-        output_dir: Optional[str] = "outputs",
-        filename: Optional[str] = None
+        num_inference_steps: int = 50,  # Increased for better quality
+        guidance_scale: float = 10.0,   # Increased for more prompt adherence
+        seed: Optional[int] = None,     # Added seed parameter for reproducibility
+        strength: float = 1.0           # Added strength parameter for prompt influence
     ) -> Union[Image.Image, List[Image.Image]]:
-        """Generate image with memory-efficient settings and enhanced quality"""
+        """Generate an image with enhanced settings for realism"""
         try:
-            if output_dir:
-                os.makedirs(output_dir, exist_ok=True)
-            
-            # Enhance prompt with realism modifiers
-            enhanced_prompt = self.enhance_prompt(prompt, subject_type)
-            
-            # Get specialized negative prompt if none provided
-            if negative_prompt is None:
-                negative_prompt = self.get_negative_prompt(subject_type)
-            
-            # Get dimensions based on orientation
+            # Set random seed if provided
+            if seed is not None:
+                torch.manual_seed(seed)
+                torch.cuda.manual_seed(seed) if self.device == "cuda" else None
+
+            # Get image dimensions
             width, height = self.get_dimensions(orientation)
             
-            logger.info(f"Generating {orientation.value} image ({width}x{height})")
-            logger.info(f"Enhanced prompt: {enhanced_prompt}")
+            # Enhance prompt and get negative prompt
+            enhanced_prompt = self.enhance_prompt(prompt, subject_type)
+            negative_prompt = self.get_negative_prompt(subject_type)
             
-            with torch.inference_mode():
+            # Generate image with enhanced settings
+            with torch.no_grad():
                 image = self.pipe(
                     prompt=enhanced_prompt,
                     negative_prompt=negative_prompt,
+                    width=width,
+                    height=height,
                     num_inference_steps=num_inference_steps,
                     guidance_scale=guidance_scale,
-                    width=width,
-                    height=height
+                    strength=strength
                 ).images[0]
             
-            if output_dir:
-                if filename is None:
-                    orientation_suffix = f"_{orientation.value}"
-                    filename = f"generated_{len(os.listdir(output_dir))}{orientation_suffix}.png"
-                save_path = os.path.join(output_dir, filename)
-                # Save with maximum quality
-                image.save(save_path, "PNG", quality=100, optimize=False)
-                logger.info(f"Image saved to {save_path}")
-            
+            # Clear CUDA cache
             self.clear_memory()
+            
             return image
             
         except Exception as e:

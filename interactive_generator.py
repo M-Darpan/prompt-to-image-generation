@@ -80,6 +80,38 @@ class ImageGeneratorGUI:
                 variable=self.orientation_var
             ).grid(row=0, column=i+1, padx=10)
         
+        # Creature type selection
+        self.creature_frame = ttk.Frame(self.main_frame)
+        self.creature_frame.grid(row=5, column=0, columnspan=2, pady=5)
+        
+        self.creature_var = tk.StringVar(value="animal")
+        
+        ttk.Label(self.creature_frame, text="Creature Type:").grid(row=0, column=0, padx=5)
+        
+        creatures = [
+            ("Animal", "animal"), 
+            ("Bird", "bird"),
+            ("Dragon", "dragon"),
+            ("Unicorn", "unicorn"),
+            ("Phoenix", "phoenix"),
+            ("Mermaid", "mermaid"),
+            ("Griffin", "griffin"),
+            ("Werewolf", "werewolf")
+        ]
+
+        creature_frame_inner = ttk.Frame(self.creature_frame)
+        creature_frame_inner.grid(row=0, column=1, columnspan=4)
+        
+        for i, (text, value) in enumerate(creatures):
+            row = i // 4
+            col = i % 4
+            ttk.Radiobutton(
+                creature_frame_inner,
+                text=text,
+                value=value,
+                variable=self.creature_var
+            ).grid(row=row, column=col, padx=5)
+        
         # Generate button
         self.generate_button = ttk.Button(
             self.main_frame,
@@ -87,7 +119,7 @@ class ImageGeneratorGUI:
             command=self.generate_image_thread,
             style='Accent.TButton'
         )
-        self.generate_button.grid(row=5, column=0, columnspan=2, pady=10)
+        self.generate_button.grid(row=6, column=0, columnspan=2, pady=10)
         
         # Configure style
         self.style = ttk.Style()
@@ -147,9 +179,10 @@ class ImageGeneratorGUI:
     
     def generate_image(self):
         try:
-            # Get prompt and orientation
+            # Get prompt, orientation and creature type
             prompt = self.prompt_entry.get("1.0", tk.END).strip()
             orientation_str = self.orientation_var.get()
+            creature_type = self.creature_var.get()
             
             # Map orientation string to enum
             orientation_map = {
@@ -163,10 +196,13 @@ class ImageGeneratorGUI:
             self.update_status("Generating image...")
             self.update_progress(0)
             
-            # Generate image
+            # Generate image with creature type
             image = self.generator.generate_image(
                 prompt=prompt,
-                orientation=orientation
+                subject_type=creature_type,
+                orientation=orientation,
+                num_inference_steps=50,
+                guidance_scale=10.0
             )
             
             # Update progress and status
